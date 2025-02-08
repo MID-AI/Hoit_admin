@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  images: {
+    domains: [`${process.env.R2_DOMAIN}`],
+  },
 };
 
 export default nextConfig;
