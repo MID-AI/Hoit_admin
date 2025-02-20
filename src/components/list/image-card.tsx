@@ -31,12 +31,11 @@ export default function ImageCard({ img }: { img: ImageProps }) {
         <Button onClick={handleClick}>
           <LetterText />
         </Button>
-        <Button variant="outline">
-          <a href={img.url} target="_blank" rel="noopener noreferrer">
+        <a href={img.url} target="_blank" rel="noopener noreferrer">
+          <Button variant="outline">
             <ScanSearch />
-          </a>
-        </Button>
-
+          </Button>
+        </a>
         <ImageDelete imgId={img.id} />
       </div>
     </li>
