@@ -1,8 +1,10 @@
-import { APIResponse, Image } from "@/@types";
+import { APIResponse, Image, PageNation } from "@/@types";
 import { API_ROUTES } from "./routes";
 
-export const getImageList = async (): Promise<APIResponse<Image>> => {
-  const res = await fetch(API_ROUTES.IMAGE, {
+export const getImageList = async (
+  page: number,
+): Promise<APIResponse<PageNation<Image>>> => {
+  const res = await fetch(`${API_ROUTES.IMAGE}?page=${page}`, {
     next: { tags: ["imageList"] },
   });
   if (!res.ok) {
@@ -12,7 +14,7 @@ export const getImageList = async (): Promise<APIResponse<Image>> => {
 };
 
 export const deleteImage = async (imgId: string) => {
-  const res = await fetch(`${API_ROUTES.IMAGE}/${imgId}`, {
+  const res = await fetch(`${API_ROUTES.IMAGE_ADMIN}/${imgId}`, {
     method: "DELETE",
   });
   if (!res.ok) {
@@ -21,7 +23,7 @@ export const deleteImage = async (imgId: string) => {
 };
 
 export const uploadImage = async (formData: FormData) => {
-  const res = await fetch(API_ROUTES.IMAGE, {
+  const res = await fetch(`${API_ROUTES.IMAGE_ADMIN}/upload`, {
     method: "POST",
     body: formData,
   });

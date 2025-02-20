@@ -1,6 +1,5 @@
 "use client";
 
-import { TagsMain } from "@/@types";
 import UploadImageAction from "@/actions/upload-image-action";
 import {
   startTransition,
@@ -9,16 +8,32 @@ import {
   useRef,
   useState,
 } from "react";
+import TagsList from "./upload/tags-list";
+import Buttons from "./upload/buttons";
+import HashTag from "./upload/hash-tag";
+import { FileInput } from "./upload/file-input";
+import { useAtom } from "jotai";
+import {
+  hashTagsAtom,
+  promptAtom,
+  selectedTagAtom,
+  subTagAtom,
+} from "@/store/image-atom";
 
 export default function ImageUpload() {
+  const [prompt, setPrompt] = useAtom(promptAtom);
+  const [selectedTag, setSelectedTag] = useAtom(selectedTagAtom);
+  const [subTag, setSubTag] = useAtom(subTagAtom);
+  const [hashTags, setHashTags] = useAtom(hashTagsAtom);
+
   const formRef = useRef<HTMLFormElement>(null);
   const [uploadFiles, setUploadFiles] = useState<FileList | null>(null);
-  const [selectedTag, setSelectedTag] = useState<string | "">("");
-  const [subTag, setSubTag] = useState<string | "">("");
+
+  const [inputValue, setInputValue] = useState<string>("");
 
   const [state, formAction, isPending] = useActionState(
     UploadImageAction,
-    null
+    null,
   );
 
   useEffect(() => {
@@ -33,18 +48,25 @@ export default function ImageUpload() {
     }
   };
 
-  const handleTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTag(e.target.value);
+  const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPrompt(e.target.value);
   };
 
-  const handleSubTagChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubTag(e.target.value);
+  const handleTagChange = (value: string) => {
+    setSelectedTag(value);
+    setSubTag("");
+  };
+
+  const handleSubTagChange = (value: string) => {
+    setSubTag(value);
   };
 
   const handleReset = () => {
     setUploadFiles(null);
     setSelectedTag("");
     setSubTag("");
+    setPrompt("");
+    setHashTags([]);
     formRef.current?.reset();
   };
 
@@ -55,95 +77,66 @@ export default function ImageUpload() {
       alert("파일을 선택해주세요.");
       return;
     }
-    if (!selectedTag) {
+    if (!selectedTag || !subTag) {
       alert("태그를 선택해주세요.");
+      return;
+    }
+    if (!prompt) {
+      alert("프롬프트를 입력해주세요.");
       return;
     }
 
     const formData = new FormData();
-    Array.from(uploadFiles).forEach((file) => {
-      formData.append("file", file);
-    });
 
-    formData.append("tag", selectedTag);
-    if (subTag) formData.append("subTag", subTag);
+    const file = uploadFiles[0];
+    formData.append("file", file);
 
+    const metadata = {
+      prompt: prompt,
+      hashtags: hashTags,
+      mainCategoryId: parseInt(selectedTag),
+      subCategoryId: parseInt(subTag),
+    };
+    formData.append("metadata", JSON.stringify(metadata));
     startTransition(() => {
       formAction(formData);
     });
   };
 
   return (
-    <section className="rounded-xl p-6 flex flex-col border border-gray-200 text-gray-900 max-w-fit">
-      <h1 className="text-lg font-bold mb-2">파일 업로드</h1>
+    <section className="flex h-fit max-w-80 flex-col gap-3 rounded-xl border border-gray-200 p-6 text-gray-900">
+      <h1 className="mb-2 text-lg font-bold">파일 업로드</h1>
       <form
         ref={formRef}
         onSubmit={handleSubmit}
         className="flex flex-col justify-between"
       >
-        <div className="mb-4 flex gap-1 flex-wrap">
-          <input type="file" name="file" onChange={handleFileChange} />
-
-          <div className="flex gap-2">
-            <div className="flex flex-col gap-2 items-start">
-              <h3 className="font-semibold">메인 태그</h3>
-              <select
-                value={selectedTag}
-                onChange={handleTagChange}
-                className="flex flex-wrap gap-2 items-center border border-zinc-900 px-3 py-1 rounded"
-              >
-                <option value="" disabled>
-                  태그를 선택하세요
-                </option>
-                {Object.keys(TagsMain).map((tag) => (
-                  <option
-                    key={tag}
-                    value={TagsMain[tag as keyof typeof TagsMain]}
-                  >
-                    {tag}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-2 items-start">
-              <h3 className="font-semibold">서브 태그</h3>
-              <select
-                value={subTag}
-                onChange={handleSubTagChange}
-                className="flex flex-wrap gap-2 items-center border border-zinc-900 px-3 py-1 rounded"
-              >
-                <option value="" disabled>
-                  태그를 선택하세요
-                </option>
-                {Object.keys(TagsMain).map((tag) => (
-                  <option
-                    key={tag}
-                    value={TagsMain[tag as keyof typeof TagsMain]}
-                  >
-                    {tag}
-                  </option>
-                ))}
-              </select>
-            </div>
+        <div className="flex flex-col gap-6">
+          <FileInput handleFileChange={(e) => handleFileChange(e)} />
+          <TagsList
+            selectedTag={selectedTag}
+            handleTagChange={handleTagChange}
+            subTag={subTag}
+            handleSubTagChange={handleSubTagChange}
+          />
+          <div>
+            <h3 className="mb-1 text-sm">프롬프트</h3>
+            <textarea
+              name="text"
+              value={prompt}
+              onChange={handlePromptChange}
+              placeholder="프롬프트를 입력해주세요"
+              className="h-20 w-full resize-none rounded-md border border-gray-300 p-2 text-sm"
+            />
           </div>
+          <HashTag
+            hashTags={hashTags}
+            setHashTags={setHashTags}
+            inputValue={inputValue}
+            setInputValue={setInputValue}
+          />
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={handleReset}
-            disabled={isPending}
-            className="p-2 rounded-lg w-full border border-black"
-          >
-            {isPending ? "..." : "초기화"}
-          </button>
-          <button
-            type="submit"
-            disabled={isPending}
-            className="text-white p-2 rounded-lg border border-zinc-900 bg-zinc-900 w-full"
-          >
-            {isPending ? "..." : "업로드"}
-          </button>
-        </div>
+        <Buttons handleReset={handleReset} isPending={isPending} />
       </form>
     </section>
   );

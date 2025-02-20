@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ReactNode } from "react";
 import "./globals.css";
+import JotaiProvider from "@/provider/jotai-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,17 +19,24 @@ export const metadata: Metadata = {
   description: "이미지 업로드",
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+type Props = {
+  children: ReactNode;
+  imglist: ReactNode;
+};
+
+export default function RootLayout({ children, imglist }: Readonly<Props>) {
   return (
     <html lang="ko">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} m-8 antialiased`}
       >
-        {children}
+        <JotaiProvider>
+          <h1 className="mb-4 text-lg font-bold">HOIT ADMIN</h1>
+          <section className="mx-auto flex flex-col gap-6 md:flex-row">
+            {children}
+            {imglist}
+          </section>
+        </JotaiProvider>
       </body>
     </html>
   );

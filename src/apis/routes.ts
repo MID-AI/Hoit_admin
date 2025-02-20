@@ -1,5 +1,6 @@
-const url = "https://api.hoit.my/admin";
+const url = "https://api.hoit.my/";
 
 export const API_ROUTES = {
-  IMAGE: `${url}/image`,
+  IMAGE: `${url}home`,
+  IMAGE_ADMIN: `${url}admin/image`,
 };
