@@ -16,7 +16,7 @@ export default async function ImageList({
         <h1 className="w-full text-xl font-bold">이미지 목록</h1>
         <ListPage
           totalPages={result.data.totalPages}
-          page={page ? Number(page) : 1}
+          page={page ? Number(page) : 0}
         />
       </div>
 

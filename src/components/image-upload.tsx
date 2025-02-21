@@ -77,7 +77,7 @@ export default function ImageUpload() {
       alert("파일을 선택해주세요.");
       return;
     }
-    if (!selectedTag || !subTag) {
+    if (!selectedTag) {
       alert("태그를 선택해주세요.");
       return;
     }
@@ -95,7 +95,7 @@ export default function ImageUpload() {
       prompt: prompt,
       hashtags: hashTags,
       mainCategoryId: parseInt(selectedTag),
-      subCategoryId: parseInt(subTag),
+      ...(subTag && { subCategoryId: parseInt(subTag) }),
     };
     formData.append("metadata", JSON.stringify(metadata));
     startTransition(() => {

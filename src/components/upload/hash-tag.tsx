@@ -47,6 +47,7 @@ export default function HashTag({
           >
             <span>{tag}</span>
             <button
+              type="button"
               onClick={() => handleRemoveTag(tag)}
               className="flex h-4 w-4 items-center justify-center rounded-full bg-gray-300 text-sm"
             >

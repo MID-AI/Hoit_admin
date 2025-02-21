@@ -5,8 +5,9 @@ import { revalidateTag } from "next/cache";
 
 export default async function UploadImageAction(
   _: unknown,
-  formData: FormData
+  formData: FormData,
 ) {
+  console.log(formData);
   try {
     await uploadImage(formData);
     revalidateTag("imageList");
